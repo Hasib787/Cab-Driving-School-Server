@@ -13,8 +13,25 @@ app.use(bodyParser.json());
 app.use(cors());
 
 client.connect(err => {
-    const booksCollection = client.db("drivingSchool").collection("programs");
-    console.log("database connected")
+    const programsCollection = client.db("drivingSchool").collection("programs");
+
+        app.get('/programs',(req, res) => {
+            programsCollection.find()
+            .toArray((err, items) => {
+                res.send(items);
+            })
+        })
+        //For add programs
+        app.post('/addprograms', (req, res) => {
+            const newprogram = req.body;
+            console.log('adding new event', newprogram);
+            programsCollection.insertOne(newprogram)
+            .then(result => {
+                console.log('inserted count', result.insertedCount)
+                res.send(result.insertedCount > 0)
+            })
+    })
+
 });
 
 app.get('/', (req, res) => {
