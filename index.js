@@ -22,7 +22,7 @@ client.connect(err => {
             })
         })
         //For add programs
-        app.post('/addprograms', (req, res) => {
+        app.post('/addPrograms', (req, res) => {
             const newprogram = req.body;
             console.log('adding new event', newprogram);
             programsCollection.insertOne(newprogram)
@@ -31,7 +31,6 @@ client.connect(err => {
                 res.send(result.insertedCount > 0)
             })
     })
-
 });
 
 client.connect(err => {
