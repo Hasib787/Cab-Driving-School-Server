@@ -34,6 +34,28 @@ client.connect(err => {
 
 });
 
+client.connect(err => {
+    const reviewCollection = client.db("drivingSchool").collection("reviews");
+
+    app.get('/reviews',(req, res) => {
+        reviewCollection.find()
+        .toArray((err, items) => {
+            res.send(items);
+        })
+    })
+
+     //For add reviews
+     app.post('/addReview', (req, res) => {
+        const newreview = req.body;
+        console.log('adding new event', newreview);
+        reviewCollection.insertOne(newreview)
+        .then(result => {
+            console.log('inserted count', result.insertedCount)
+            res.send(result.insertedCount > 0)
+        })
+})
+});
+
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
