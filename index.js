@@ -31,6 +31,29 @@ client.connect(err => {
                 res.send(result.insertedCount > 0)
             })
     })
+
+    app.get('/programItem/:bookid', (req, res) => {
+	    const bookid = ObjectID(req.params.bookid);
+        programsCollection.find({_id: bookid})
+            .toArray((err, documents) => {
+                res.send(documents[0]);
+            })
+    })
+
+    app.post('/bookitemByIds', (req, res) => {
+        const bookitemIds = req.body;
+        programsCollection.find({_id: { $in: bookitemIds}})
+        .toArray((err, documents)=>{
+            res.send(documents)
+        })
+    }) 
+
+    app.delete('/deletebook/:id', (req, res)=> {
+        const id = ObjectID(req.params.id);
+        console.log("delete this",id);
+        booksCollection.findOneAndDelete({_id: id})
+        .then(documents => res.send(documents.deletedCount > 0))
+    })
 });
 
 client.connect(err => {
