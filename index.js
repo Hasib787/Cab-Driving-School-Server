@@ -64,6 +64,37 @@ client.connect(err => {
     })
 });
 
+
+//Order collection
+client.connect(err => {
+    const orderCollection = client.db("drivingSchool").collection("orders");
+    app.post('/addOrder', (req, res) => {
+        const newOrder = req.body;
+        orderCollection.insertOne(newOrder)
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+        console.log(newOrder);
+    })
+
+});
+
+
+//Amin Collection 
+client.connect(err => {
+    const adminCollection = client.db("drivingSchool").collection("admin");
+    app.post('/makeAdmin', (req, res) => {
+        const newAdmin = req.body;
+        adminCollection.insertOne(newAdmin)
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+        console.log(newAdmin);
+    })
+
+});
+
+//Review Collection
 client.connect(err => {
     const reviewCollection = client.db("drivingSchool").collection("reviews");
 
@@ -84,19 +115,6 @@ client.connect(err => {
             res.send(result.insertedCount > 0)
         })
 })
-});
-
-client.connect(err => {
-    const orderCollection = client.db("drivingSchool").collection("orders");
-    app.post('/addOrder', (req, res) => {
-        const newOrder = req.body;
-        orderCollection.insertOne(newOrder)
-            .then(result => {
-                res.send(result.insertedCount > 0);
-            })
-        console.log(newOrder);
-    })
-
 });
 
 app.get('/', (req, res) => {
