@@ -2,6 +2,7 @@ const express = require('express')
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
 const bodyParser = require('body-parser');
+const admin = require('firebase-admin');
 const cors = require('cors');
 require('dotenv').config()
 
@@ -11,6 +12,13 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 const app = express()
 app.use(bodyParser.json());
 app.use(cors());
+
+const serviceAccount = require("./cab-driving-school-firebase-adminsdk-g12f2-860d3a39cb.json");
+
+admin.initializeApp({ 
+  credential: admin.credential.cert(serviceAccount)
+});
+
 
 client.connect(err => {
     const programsCollection = client.db("drivingSchool").collection("programs");
@@ -40,15 +48,15 @@ client.connect(err => {
             })
     })
 
-    app.post('/bookitemByIds', (req, res) => {
-        const bookitemIds = req.body;
-        programsCollection.find({_id: { $in: bookitemIds}})
+    app.post('/programItemByIds', (req, res) => {
+        const programitemIds = req.body;
+        programsCollection.find({_id: { $in: programitemIds}})
         .toArray((err, documents)=>{
             res.send(documents)
         })
     }) 
 
-    app.delete('/deletebook/:id', (req, res)=> {
+    app.delete('/deleteService/:id', (req, res)=> {
         const id = ObjectID(req.params.id);
         console.log("delete this",id);
         booksCollection.findOneAndDelete({_id: id})
@@ -76,6 +84,19 @@ client.connect(err => {
             res.send(result.insertedCount > 0)
         })
 })
+});
+
+client.connect(err => {
+    const orderCollection = client.db("drivingSchool").collection("orders");
+    app.post('/addOrder', (req, res) => {
+        const newOrder = req.body;
+        orderCollection.insertOne(newOrder)
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+        console.log(newOrder);
+    })
+
 });
 
 app.get('/', (req, res) => {
