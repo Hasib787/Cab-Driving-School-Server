@@ -78,34 +78,35 @@ client.connect(err => {
     })
 
     app.get('/orders', (req, res) => {
-        const bearer = req.headers.authorization;
-        if (bearer && bearer.startsWith('Bearer ')) {
-            const idToken = bearer.split(' ')[1];
-            console.log({ idToken });
-            admin
-                .auth()
-                .verifyIdToken(idToken)
-                .then((decodedToken) => {
-                    const tokenEmail = decodedToken.email;
-                    const queryEmail = req.query.email;
-                    console.log(tokenEmail, queryEmail);
-                    if (tokenEmail === queryEmail) {
-                        booksCollection.find({ email: req.query.email })
-                            .toArray((err, documents) => {
-                                res.status(200).send(documents)
-                            })
-                    }
-                    else{
-                        res.status(401).send('un-authorized access')
-                    }
-                })
-                .catch((error) => { 
-                    // Handle error
-                });
-             }
-             else{
-                 res.status(401).send('un-authorized access')
-             }
+        booksCollection.find({ email: req.query.email })
+        .toArray((err, documents) => {
+            res.status(200).send(documents)
+        })
+        // const bearer = req.headers.authorization;
+        // if (bearer && bearer.startsWith('Bearer ')) {
+        //     const idToken = bearer.split(' ')[1];
+        //     console.log({ idToken });
+        //     admin
+        //         .auth()
+        //         .verifyIdToken(idToken)
+        //         .then((decodedToken) => {
+        //             const tokenEmail = decodedToken.email;
+        //             const queryEmail = req.query.email;
+        //             console.log(tokenEmail, queryEmail);
+        //             if (tokenEmail === queryEmail) {
+                       
+        //             }
+        //             else{
+        //                 res.status(401).send('un-authorized access')
+        //             }
+        //         })
+        //         .catch((error) => { 
+        //             // Handle error
+        //         });
+        //      }
+        //      else{
+        //          res.status(401).send('un-authorized access')
+        //      }
 
     })
 
