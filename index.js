@@ -68,6 +68,7 @@ client.connect(err => {
 //Order collection
 client.connect(err => {
     const orderCollection = client.db("drivingSchool").collection("orders");
+    const adminCollection = client.db("drivingSchool").collection("admin");
     app.post('/addOrder', (req, res) => {
         const newOrder = req.body;
         orderCollection.insertOne(newOrder)
@@ -78,44 +79,29 @@ client.connect(err => {
     })
 
     app.get('/orders', (req, res) => {
-        const bearer = req.headers.authorization;
-        if (bearer && bearer.startsWith('Bearer ')) {
-            const idToken = bearer.split(' ')[1];
-            console.log({ idToken });
-            admin
-                .auth()
-                .verifyIdToken(idToken)
-                .then((decodedToken) => {
-                    const tokenEmail = decodedToken.email;
-                    const queryEmail = req.query.email;
-                    console.log(tokenEmail, queryEmail);
-                    if (tokenEmail === queryEmail) {
-                        orderCollection.find({ email: req.query.email })
-                            .toArray((err, documents) => {
-                                res.status(200).send(documents)
-                            })
-                    }
-                    else{
-                        res.status(401).send('un-authorized access')
-                    }
-                })
-                .catch((error) => { 
-                    // Handle error
-                });
-             }
-             else{
-                 res.status(401).send('un-authorized access')
-             }
-
+        orderCollection.find({})
+            .toArray((err, documents) => {
+                res.send(documents);
+            })
     })
 
+    app.post('/ordersById', (req, res) => {
+        const id = req.body;
+        const email = req.body.email;
+        adminCollection.find({ email: email })
+            .toArray((err, admin) => {
+                const filter = { _id: id._id }
+                if (admin.length === 0) {
+                    filter.email = email;
+                }
+                orderCollection.find(filter)
+                    .toArray((err, documents) => {
+                        console.log(email, id._id, admin, documents)
+                        res.send(documents);
+                    })
+            })
+    })
 
-});
-
-
-//Amin Collection 
-client.connect(err => {
-    const adminCollection = client.db("drivingSchool").collection("admin");
     app.post('/makeAdmin', (req, res) => {
         const newAdmin = req.body;
         adminCollection.insertOne(newAdmin)
@@ -125,7 +111,58 @@ client.connect(err => {
         console.log(newAdmin);
     })
 
+    app.get('/admins', (req, res) => {
+        adminCollection.find({})
+            .toArray((err, documents) => {
+                res.send(documents);
+            })
+    });
+
+    app.post('/isAdmin', (req, res) => {
+        const email = req.body.email;
+        adminCollection.find({ email: email })
+            .toArray((err, admin) => {
+                res.send(admin.length > 0);
+            })
+    })
+    // app.get('/orders', (req, res) => {
+    //     const bearer = req.headers.authorization;
+    //     if (bearer && bearer.startsWith('Bearer ')) {
+    //         const idToken = bearer.split(' ')[1];
+    //         console.log({ idToken });
+    //         admin
+    //             .auth()
+    //             .verifyIdToken(idToken)
+    //             .then((decodedToken) => {
+    //                 const tokenEmail = decodedToken.email;
+    //                 const queryEmail = req.query.email;
+    //                 console.log(tokenEmail, queryEmail);
+    //                 if (tokenEmail === queryEmail) {
+    //                     orderCollection.find({ email: req.query.email })
+    //                         .toArray((err, documents) => {
+    //                             res.status(200).send(documents)
+    //                         })
+    //                 }
+    //                 else{
+    //                     res.status(401).send('un-authorized access')
+    //                 }
+    //             })
+    //             .catch((error) => { 
+    //                 // Handle error
+    //             });
+    //          }
+    //          else{
+    //              res.status(401).send('un-authorized access')
+    //          }
+
+    // })
+
+
 });
+
+
+//Amin Collection 
+
 
 //Review Collection
 client.connect(err => {
